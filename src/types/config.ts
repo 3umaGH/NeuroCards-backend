@@ -15,3 +15,5 @@ export type Config = {
   MIN_ANSWER_LENGTH: number
   MAX_ANSWER_LENGTH: number
 }
+
+export type ConfigDTO = Omit<Config, 'OPEN_AI_KEY'>

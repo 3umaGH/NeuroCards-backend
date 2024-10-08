@@ -25,6 +25,7 @@ export const flashCardService = new FlashCardService(flashCardRepository, CONFIG
 export const flashCardController = new FlashCardController(flashCardService, openAIService)
 
 app.use('/v1/quiz', require('./routes/v1/quiz'))
+app.use('/v1/config', require('./routes/v1/config'))
 
 app.get('*', (req: Request, res: Response) => {
   res.status(404).json({
