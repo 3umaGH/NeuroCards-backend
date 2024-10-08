@@ -18,7 +18,15 @@ export class FlashCardRepository {
       database: config.DB.DB,
     })
 
-    console.log('MySQL Connected.')
+    this.pool
+      .query('SET SESSION group_concat_max_len = 30000')
+      .then(() => {
+        console.log('Set group_concat_max_len to 30k')
+        console.log('MySQL Connected.')
+      })
+      .catch(err => {
+        console.error('Error setting session variable:', err)
+      })
   }
 
   getRecentQuizzes = async (): Promise<QuizTableItem[]> => {
@@ -37,13 +45,14 @@ export class FlashCardRepository {
   }
 
   getQuizById = async (id: number) => {
+    //TODO: This feels like not correct way of doing this, need to look into this later.
     return this.pool
       .query(
-        `SELECT 
+        ` SELECT 
           quizzes.id,
           quizzes.topic,
-          GROUP_CONCAT(quiz_questions.question ORDER BY quiz_questions.id) AS questions,
-          GROUP_CONCAT(quiz_questions.answer ORDER BY quiz_questions.id) AS answers
+          GROUP_CONCAT(quiz_questions.question SEPARATOR ';---;') AS questions,
+          GROUP_CONCAT(quiz_questions.answer SEPARATOR ';---;') AS answers
           FROM quizzes
           JOIN quiz_questions ON quizzes.id = quiz_questions.quiz_id
           WHERE quizzes.id = ?
@@ -64,8 +73,9 @@ export class FlashCardRepository {
           throw new EntityNotFoundError(`Quiz with id ${id} does not exist.`)
         }
 
-        const questionsArray = row.questions.split(',')
-        const answersArray = row.answers.split(',')
+        const questionsArray = row.questions.split(';---;')
+        const answersArray = row.answers.split(';---;')
+
         const mappedQuestions = questionsArray.map((question, index) => ({
           id: index,
           question,
