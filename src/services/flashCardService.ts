@@ -23,8 +23,8 @@ export class FlashCardService {
     }
 
     if (
-      draft.quiz_topic.length >= this.config.MAX_QUIZ_TITLE_LENGTH ||
-      draft.quiz_topic.length <= this.config.MIN_QUIZ_TITLE_LENGTH
+      draft.quiz_topic.length > this.config.MAX_QUIZ_TITLE_LENGTH ||
+      draft.quiz_topic.length < this.config.MIN_QUIZ_TITLE_LENGTH
     ) {
       throw new BadRequestError('Invalid quiz title length.')
     }
@@ -32,21 +32,21 @@ export class FlashCardService {
     const newQuiz: FlashCardQuiz = { id: -1, quiz_topic: draft.quiz_topic, questions: [] }
 
     draft.questions.forEach(question => {
-      if (newQuiz.questions.length >= this.config.MAX_QUESTIONS_IN_QUIZ) {
+      if (newQuiz.questions.length > this.config.MAX_QUESTIONS_IN_QUIZ) {
         return
       }
 
       if (typeof question.question === 'string' && typeof question.answer === 'string') {
         if (
-          question.question.length >= this.config.MAX_QUESTION_LENGTH ||
-          question.question.length <= this.config.MIN_QUESTION_LENGTH
+          question.question.length > this.config.MAX_QUESTION_LENGTH ||
+          question.question.length < this.config.MIN_QUESTION_LENGTH
         ) {
           return
         }
 
         if (
-          question.answer.length >= this.config.MAX_ANSWER_LENGTH ||
-          question.answer.length <= this.config.MIN_QUESTION_LENGTH
+          question.answer.length > this.config.MAX_ANSWER_LENGTH ||
+          question.answer.length < this.config.MIN_QUESTION_LENGTH
         ) {
           return
         }
