@@ -18,7 +18,7 @@ export class OpenAIService {
   }
 
   generateFlashCards = async (input: string) => {
-    if (input.length < this.config.MIN_AI_INPUT || input.length > this.config.MAX_AI_INPUT) {
+    if (input.length <= this.config.MIN_AI_INPUT || input.length >= this.config.MAX_AI_INPUT) {
       throw new BadRequestError(
         `Invalid input length. Provide between ${this.config.MIN_AI_INPUT}-${this.config.MAX_AI_INPUT} chars.`
       )
@@ -72,17 +72,21 @@ export class OpenAIService {
       const newQuiz: FlashCardQuiz = { id: -1, quiz_topic: result.qt, questions: [] }
 
       array.forEach(question => {
+        if (newQuiz.questions.length >= this.config.MAX_QUESTIONS_IN_QUIZ) {
+          return
+        }
+
         if (typeof question.q === 'string' && typeof question.a === 'string') {
           if (
-            question.q.length > this.config.MAX_QUESTION_LENGTH ||
-            question.q.length < this.config.MIN_QUESTION_LENGTH
+            question.q.length >= this.config.MAX_QUESTION_LENGTH ||
+            question.q.length <= this.config.MIN_QUESTION_LENGTH
           ) {
             return
           }
 
           if (
-            question.a.length > this.config.MAX_ANSWER_LENGTH ||
-            question.a.length < this.config.MIN_QUESTION_LENGTH
+            question.a.length >= this.config.MAX_ANSWER_LENGTH ||
+            question.a.length <= this.config.MIN_QUESTION_LENGTH
           ) {
             return
           }
@@ -91,7 +95,7 @@ export class OpenAIService {
         }
       })
 
-      if (newQuiz.questions.length < this.config.MIN_QUESTIONS_IN_QUIZ) {
+      if (newQuiz.questions.length <= this.config.MIN_QUESTIONS_IN_QUIZ) {
         throw new InternalServerError(
           `OpenAI returned quiz with less than ${this.config.MIN_QUESTIONS_IN_QUIZ} valid flash cards.`
         )
