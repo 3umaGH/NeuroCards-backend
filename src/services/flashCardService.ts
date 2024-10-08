@@ -55,7 +55,7 @@ export class FlashCardService {
       }
     })
 
-    return await this.repository.saveQuiz(newQuiz)
+    return await this.repository.saveQuiz(newQuiz, false)
   }
 
   getRecentQuizzes = async () => {

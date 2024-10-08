@@ -107,7 +107,7 @@ export class OpenAIService {
         )
       }
 
-      return await this.repository.saveQuiz(newQuiz)
+      return await this.repository.saveQuiz(newQuiz, true)
     }
 
     throw new InternalServerError(`AI returned quiz in an unexpected format. Result: ${JSON.stringify(result)}`)

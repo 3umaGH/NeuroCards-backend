@@ -15,7 +15,7 @@ app.use(express.json())
 
 app.use(
   cors({
-    origin: ['https://neurocards-production.up.railway.app', 'https://www.neurocards-production.up.railway.app'],
+    origin: '*',
     optionsSuccessStatus: 200,
   })
 )

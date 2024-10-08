@@ -23,7 +23,7 @@ export class FlashCardRepository {
 
   getRecentQuizzes = async (): Promise<QuizTableItem[]> => {
     return this.pool
-      .query('SELECT * FROM quizzes ORDER BY id DESC')
+      .query('SELECT * FROM quizzes WHERE ai_generated = true ORDER BY id DESC')
       .then(([rows, _]) => {
         return (rows as { id: number; topic: string; questions: number }[]).map(row => ({
           id: row.id,
@@ -81,15 +81,15 @@ export class FlashCardRepository {
       })
   }
 
-  saveQuiz = async (quiz: FlashCardQuiz) => {
+  saveQuiz = async (quiz: FlashCardQuiz, aiGenerated: boolean) => {
     const connection = await this.pool.getConnection()
 
     try {
       await connection.beginTransaction()
 
       const [quizResult] = await connection.query<ResultSetHeader>(
-        'INSERT INTO quizzes (topic,questions) VALUES (?,?)',
-        [quiz.quiz_topic, quiz.questions.length]
+        'INSERT INTO quizzes (topic, questions, ai_generated) VALUES (?, ?, ?)',
+        [quiz.quiz_topic, quiz.questions.length, aiGenerated]
       )
 
       const quizId = quizResult.insertId
