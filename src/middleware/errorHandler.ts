@@ -30,8 +30,8 @@ export const errorHandler = (err: Error, req: Request, res: Response, _: NextFun
   }
 
   if (err instanceof InternalServerError) {
-    res.status(statusCode).send({ ...err, message: 'Something unexpected happened, please try again later' })
+    res.status(statusCode).json({ ...err, message: 'Something unexpected happened, please try again later' })
   } else {
-    res.status(statusCode).send({ ...err, message: err.message })
+    res.status(statusCode).json({ ...err, message: err.message })
   }
 }
