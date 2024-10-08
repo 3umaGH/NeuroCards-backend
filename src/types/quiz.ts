@@ -22,3 +22,4 @@ export type QuizTableItem = {
 
 export type FlashCardQuizDraft = Omit<FlashCardQuiz, 'id' | 'questions'> & { questions: FlashCardQuestionDraft[] }
 export type FlashCardQuestionDraft = Omit<FlashCardQuestion, 'id'>
+

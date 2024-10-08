@@ -1,9 +1,11 @@
+import cors from 'cors'
 import express, { Request, Response } from 'express'
+import { CONFIG } from './config'
 import { FlashCardController } from './controllers/flashCardController'
 import { errorHandler } from './middleware/errorHandler'
 import { FlashCardRepository } from './repositories/flashCardRepository'
 import { FlashCardService } from './services/flashCardService'
-import cors from 'cors'
+import { OpenAIService } from './services/openAiService'
 
 const app = express()
 const port = 3000
@@ -18,6 +20,7 @@ app.use(
 )
 
 export const flashCardRepository = new FlashCardRepository()
+export const openAIService = new OpenAIService(CONFIG.OPEN_AI_KEY)
 export const flashCardService = new FlashCardService(flashCardRepository)
 export const flashCardController = new FlashCardController(flashCardService)
 
