@@ -4,16 +4,14 @@ import { InternalServerError } from '../error/InternalServerError'
 import { FlashCardRepository } from '../repositories/flashCardRepository'
 import { AIError, QuizAIResponse } from '../types/ai'
 import { FlashCardQuiz } from '../types/quiz'
+import { Config } from '../types/config'
 
 export class OpenAIService {
   private repository: FlashCardRepository
   private openAI: OpenAI
-  private config: { MAX_AI_INPUT: number; MIN_AI_INPUT: number }
+  private config: Config
 
-  constructor(
-    repository: FlashCardRepository,
-    config: { OPEN_AI_KEY: string; MAX_AI_INPUT: number; MIN_AI_INPUT: number }
-  ) {
+  constructor(repository: FlashCardRepository, config: Config) {
     this.repository = repository
     this.openAI = new OpenAI({ apiKey: config.OPEN_AI_KEY })
     this.config = config
@@ -72,11 +70,17 @@ export class OpenAIService {
 
       array.forEach(question => {
         if (typeof question.q === 'string' && typeof question.a === 'string') {
-          if (question.q.length > 150) {
+          if (
+            question.q.length > this.config.MAX_QUESTION_LENGTH ||
+            question.q.length < this.config.MIN_QUESTION_LENGTH
+          ) {
             return
           }
 
-          if (question.a.length > 300) {
+          if (
+            question.a.length > this.config.MAX_ANSWER_LENGTH ||
+            question.a.length < this.config.MIN_QUESTION_LENGTH
+          ) {
             return
           }
 
@@ -84,8 +88,10 @@ export class OpenAIService {
         }
       })
 
-      if (newQuiz.questions.length < 3) {
-        throw new InternalServerError('OpenAI returned quiz with less than 3 valid flash cards.')
+      if (newQuiz.questions.length < this.config.MIN_QUESTIONS_IN_QUIZ) {
+        throw new InternalServerError(
+          `OpenAI returned quiz with less than ${this.config.MIN_QUESTIONS_IN_QUIZ} valid flash cards.`
+        )
       }
 
       return await this.repository.saveQuiz(newQuiz)
