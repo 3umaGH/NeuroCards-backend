@@ -13,6 +13,6 @@ export class FlashCardRepository {
   }
 
   saveQuiz = async (quiz: FlashCardQuiz) => {
-    return true
+    return { ...quiz, id: 123 } // TODO: Assign correct ID
   }
 }

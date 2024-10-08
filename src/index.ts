@@ -20,9 +20,9 @@ app.use(
 )
 
 export const flashCardRepository = new FlashCardRepository()
-export const openAIService = new OpenAIService(CONFIG.OPEN_AI_KEY)
+export const openAIService = new OpenAIService(flashCardRepository, CONFIG)
 export const flashCardService = new FlashCardService(flashCardRepository)
-export const flashCardController = new FlashCardController(flashCardService)
+export const flashCardController = new FlashCardController(flashCardService, openAIService)
 
 app.use('/v1/quiz', require('./routes/v1/quiz'))
 

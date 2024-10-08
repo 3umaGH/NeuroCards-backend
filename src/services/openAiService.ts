@@ -1,21 +1,31 @@
 import OpenAI from 'openai'
 import { BadRequestError } from '../error/BadRequestError'
 import { InternalServerError } from '../error/InternalServerError'
+import { FlashCardRepository } from '../repositories/flashCardRepository'
 import { AIError, QuizAIResponse } from '../types/ai'
 import { FlashCardQuiz } from '../types/quiz'
 
 export class OpenAIService {
+  private repository: FlashCardRepository
   private openAI: OpenAI
+  private config: { MAX_AI_INPUT: number; MIN_AI_INPUT: number }
 
-  constructor(key: string | undefined) {
-    if (!key) {
-      throw new Error('OpenAI key is not provided.')
-    }
-
-    this.openAI = new OpenAI({ apiKey: key })
+  constructor(
+    repository: FlashCardRepository,
+    config: { OPEN_AI_KEY: string; MAX_AI_INPUT: number; MIN_AI_INPUT: number }
+  ) {
+    this.repository = repository
+    this.openAI = new OpenAI({ apiKey: config.OPEN_AI_KEY })
+    this.config = config
   }
 
   generateFlashCards = async (input: string) => {
+    if (input.length < this.config.MIN_AI_INPUT || input.length > this.config.MAX_AI_INPUT) {
+      throw new BadRequestError(
+        `Invalid input length. Provide between ${this.config.MIN_AI_INPUT}-${this.config.MAX_AI_INPUT} chars.`
+      )
+    }
+
     const completion = await this.openAI.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -78,7 +88,7 @@ export class OpenAIService {
         throw new InternalServerError('OpenAI returned quiz with less than 3 valid flash cards.')
       }
 
-      return newQuiz
+      return await this.repository.saveQuiz(newQuiz)
     }
 
     throw new InternalServerError(`AI returned quiz in an unexpected format. Result: ${JSON.stringify(result)}`)
