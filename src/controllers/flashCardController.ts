@@ -26,15 +26,7 @@ export class FlashCardController {
     }
   }
 
-  createQuizWithAI = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      /* todo */
-    } catch (err) {
-      next(err)
-    }
-  }
-
-  createQuizManually = async (req: Request, res: Response, next: NextFunction) => {
+  createQuiz = async (req: Request, res: Response, next: NextFunction) => {
     try {
       /* todo */
     } catch (err) {
