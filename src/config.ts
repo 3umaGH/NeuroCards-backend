@@ -17,4 +17,11 @@ export const CONFIG: Config = {
 
   MIN_ANSWER_LENGTH: 3,
   MAX_ANSWER_LENGTH: 300,
+
+  DB: {
+    HOST: process.env.DB_HOST ?? '',
+    USER: process.env.DB_USER ?? '',
+    PASSWORD: process.env.DB_PASSWORD ?? '',
+    DB: process.env.DB_DB ?? '',
+  },
 }

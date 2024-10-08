@@ -14,6 +14,13 @@ export type Config = {
 
   MIN_ANSWER_LENGTH: number
   MAX_ANSWER_LENGTH: number
+
+  DB: {
+    HOST: string
+    USER: string
+    PASSWORD: string
+    DB: string
+  }
 }
 
-export type ConfigDTO = Omit<Config, 'OPEN_AI_KEY'>
+export type ConfigDTO = Omit<Omit<Config, 'OPEN_AI_KEY'>, 'DB'>
