@@ -55,14 +55,14 @@ export class FlashCardService {
       }
     })
 
-    return this.repository.saveQuiz(newQuiz)
+    return await this.repository.saveQuiz(newQuiz)
   }
 
-  getRecentQuizzes = () => {
-    return this.repository.getRecentQuizzes()
+  getRecentQuizzes = async () => {
+    return await this.repository.getRecentQuizzes()
   }
 
-  getQuizById = (id: number) => {
-    return this.repository.getQuizById(id)
+  getQuizById = async (id: number) => {
+    return await this.repository.getQuizById(id)
   }
 }

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
+import { BadRequestError } from '../error/BadRequestError'
 import { FlashCardService } from '../services/flashCardService'
 import { OpenAIService } from '../services/openAiService'
-import { BadRequestError } from '../error/BadRequestError'
 
 export class FlashCardController {
   private service: FlashCardService
@@ -14,7 +14,13 @@ export class FlashCardController {
 
   getQuizById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await this.service.getQuizById(0)
+      const id = Number(req.params.id)
+
+      if (isNaN(id)) {
+        throw new BadRequestError('ID must be a number.')
+      }
+
+      const result = await this.service.getQuizById(id)
       res.status(200).json(result)
     } catch (err) {
       next(err)

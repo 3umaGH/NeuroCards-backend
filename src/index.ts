@@ -19,7 +19,7 @@ app.use(
   })
 )
 
-export const flashCardRepository = new FlashCardRepository()
+export const flashCardRepository = new FlashCardRepository(CONFIG)
 export const openAIService = new OpenAIService(flashCardRepository, CONFIG)
 export const flashCardService = new FlashCardService(flashCardRepository, CONFIG)
 export const flashCardController = new FlashCardController(flashCardService, openAIService)

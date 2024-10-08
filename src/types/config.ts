@@ -17,6 +17,7 @@ export type Config = {
 
   DB: {
     HOST: string
+    PORT: number
     USER: string
     PASSWORD: string
     DB: string
