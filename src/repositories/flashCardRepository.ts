@@ -1,9 +1,17 @@
+import mysql, { ResultSetHeader } from 'mysql2/promise'
 import { EntityNotFoundError } from '../error/EntityNotFoundError'
 import { InternalServerError } from '../error/InternalServerError'
 import { Config } from '../types/config'
 import { FlashCardQuiz, QuizTableItem } from '../types/quiz'
 
-import mysql, { ResultSetHeader } from 'mysql2/promise'
+type RecentQuizzesQueryRes = { id: number; topic: string; questions: number }[]
+type QuestionsQueryRes = { question: string; answer: string }[]
+type QuizQueryRes = {
+  id: number
+  topic: string
+  questions: number
+  ai_generated: 1 | 0
+}
 
 export class FlashCardRepository {
   private pool: mysql.Pool
@@ -23,7 +31,7 @@ export class FlashCardRepository {
     return this.pool
       .query('SELECT * FROM quizzes WHERE ai_generated = true ORDER BY id DESC')
       .then(([rows, _]) => {
-        return (rows as { id: number; topic: string; questions: number }[]).map(row => ({
+        return (rows as RecentQuizzesQueryRes).map(row => ({
           id: row.id,
           quiz_topic: row.topic,
           questions_amount: row.questions,
@@ -38,28 +46,22 @@ export class FlashCardRepository {
     const questions = await this.pool
       .query(`SELECT * FROM quiz_questions WHERE quiz_id = ?`, [id])
       .then(([rows, _]) => {
-        return (rows as { question: string; answer: string }[]).map((row, index) => ({
+        return (rows as QuestionsQueryRes).map((row, index) => ({
           id: index,
           question: row.question,
           answer: row.answer,
         }))
       })
 
-    const quiz = (await this.pool
+    const quiz = await this.pool
       .query(`SELECT * FROM quizzes where id = ?`, [id])
-      .then(([rows, _]) => (rows as unknown[])[0])) as {
-      id: number
-      topic: string
-      questions: number
-      ai_generated: 1 | 0
-    }
+      .then(([rows, _]) => (rows as QuizQueryRes[])[0])
 
     if (!quiz || questions.length === 0) {
       throw new EntityNotFoundError(`Quiz with id ${id} does not exist.`)
     }
 
     const mappedQuiz: FlashCardQuiz = { id: quiz.id, quiz_topic: quiz.topic, questions: questions }
-
     return mappedQuiz
   }
 
