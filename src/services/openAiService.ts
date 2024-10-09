@@ -17,7 +17,7 @@ export class OpenAIService {
     this.config = config
   }
 
-  generateFlashCards = async (input: string) => {
+  generateAIQuiz = async (input: string, showInList: boolean) => {
     if (input.length < this.config.MIN_AI_INPUT || input.length > this.config.MAX_AI_INPUT) {
       throw new BadRequestError(
         `Invalid input length. Provide between ${this.config.MIN_AI_INPUT}-${this.config.MAX_AI_INPUT} chars.`
@@ -107,7 +107,7 @@ export class OpenAIService {
         )
       }
 
-      return await this.repository.saveQuiz(newQuiz, true)
+      return await this.repository.saveQuiz(newQuiz, showInList)
     }
 
     throw new InternalServerError(`AI returned quiz in an unexpected format. Result: ${JSON.stringify(result)}`)

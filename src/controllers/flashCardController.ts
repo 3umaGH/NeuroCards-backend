@@ -48,7 +48,9 @@ export class FlashCardController {
       if (req.body.text && typeof req.body.text === 'string') {
         // ai creation
 
-        const aiResult = await this.openAIService.generateFlashCards(req.body.text)
+        console.log(req.body)
+
+        const aiResult = await this.openAIService.generateAIQuiz(req.body.text, req.body.showInList === true)
         res.status(200).json(aiResult)
         return
       }
