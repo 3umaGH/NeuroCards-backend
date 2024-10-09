@@ -17,16 +17,6 @@ export class FlashCardRepository {
       password: config.DB.PASSWORD,
       database: config.DB.DB,
     })
-
-    this.pool
-      .query('SET SESSION group_concat_max_len = 30000')
-      .then(() => {
-        console.log('Set group_concat_max_len to 30k')
-        console.log('MySQL Connected.')
-      })
-      .catch(err => {
-        console.error('Error setting session variable:', err)
-      })
   }
 
   getRecentQuizzes = async (): Promise<QuizTableItem[]> => {
@@ -45,50 +35,32 @@ export class FlashCardRepository {
   }
 
   getQuizById = async (id: number) => {
-    //TODO: This feels like not correct way of doing this, need to look into this later.
-    return this.pool
-      .query(
-        ` SELECT 
-          quizzes.id,
-          quizzes.topic,
-          GROUP_CONCAT(quiz_questions.question SEPARATOR ';---;') AS questions,
-          GROUP_CONCAT(quiz_questions.answer SEPARATOR ';---;') AS answers
-          FROM quizzes
-          JOIN quiz_questions ON quizzes.id = quiz_questions.quiz_id
-          WHERE quizzes.id = ?
-          GROUP BY quizzes.id;`,
-        [id]
-      )
+    const questions = await this.pool
+      .query(`SELECT * FROM quiz_questions WHERE quiz_id = ?`, [id])
       .then(([rows, _]) => {
-        const row = (
-          rows as {
-            id: number
-            topic: string
-            questions: string
-            answers: string
-          }[]
-        )[0]
-
-        if (!row) {
-          throw new EntityNotFoundError(`Quiz with id ${id} does not exist.`)
-        }
-
-        const questionsArray = row.questions.split(';---;')
-        const answersArray = row.answers.split(';---;')
-
-        const mappedQuestions = questionsArray.map((question, index) => ({
+        return (rows as { question: string; answer: string }[]).map((row, index) => ({
           id: index,
-          question,
-          answer: answersArray[index],
+          question: row.question,
+          answer: row.answer,
         }))
-
-        const quiz: FlashCardQuiz = { id: row.id, quiz_topic: row.topic, questions: mappedQuestions }
-
-        return quiz
       })
-      .catch(err => {
-        throw new InternalServerError(err)
-      })
+
+    const quiz = (await this.pool
+      .query(`SELECT * FROM quizzes where id = ?`, [id])
+      .then(([rows, _]) => (rows as unknown[])[0])) as {
+      id: number
+      topic: string
+      questions: number
+      ai_generated: 1 | 0
+    }
+
+    if (!quiz || questions.length === 0) {
+      throw new EntityNotFoundError(`Quiz with id ${id} does not exist.`)
+    }
+
+    const mappedQuiz: FlashCardQuiz = { id: quiz.id, quiz_topic: quiz.topic, questions: questions }
+
+    return mappedQuiz
   }
 
   saveQuiz = async (quiz: FlashCardQuiz, aiGenerated: boolean) => {
