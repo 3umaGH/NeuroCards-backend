@@ -29,7 +29,7 @@ export class FlashCardRepository {
 
   getRecentQuizzes = async (): Promise<QuizTableItem[]> => {
     return this.pool
-      .query('SELECT * FROM quizzes WHERE ai_generated = true ORDER BY id DESC')
+      .query('SELECT * FROM quizzes WHERE ai_generated = true ORDER BY id DESC LIMIT 200')
       .then(([rows, _]) => {
         return (rows as RecentQuizzesQueryRes).map(row => ({
           id: row.id,
